@@ -22,10 +22,28 @@ const UserSchema = new Schema({
         min: [0, 'balance can\'t be below 0'],
         default: 0
     },
-    purchases: [Number],
-    shoppingCart: [Number],
+    purchases: {
+        type: [Schema.Types.ObjectId],
+        ref: 'Product'
+    },
+    shoppingCart: {
+        type: [Schema.Types.ObjectId],
+        ref: 'Product'
+    },
 }, {
-    timestamps: true
+    timestamps: true,
+    toJSON: { 
+        transform: function(doc, ret) {
+            ret.shoppingCartCount = ret.shoppingCart.length;
+            delete ret._id;
+            delete ret.__v;
+            delete ret.createdAt;
+            delete ret.updatedAt;
+            delete ret.passwordHash;
+            delete ret.purchases;
+            delete ret.shoppingCart;
+        }
+    }
 });
 
 const User = model('User', UserSchema);

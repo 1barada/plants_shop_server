@@ -10,12 +10,6 @@ const generateAccessToken = ({_id, role}) => {
     return jwt.sign({_id, role}, process.env.JWT_SECRET_KEY, {expiresIn})
 }
 
-function LoginResponse(username, token, role) {
-    this.username = username;
-    this.token = token;
-    this.role = role;
-};
-
 export const login = async (req, res) => {
     try {
         const validationErrors = validationResultHandler(req);
@@ -55,10 +49,9 @@ export const login = async (req, res) => {
                 ]
             });
         }
+        user._doc.token = generateAccessToken(user);
 
-        const token = generateAccessToken(user);
-
-        return res.status(200).json(new LoginResponse(user.name, token, user.role));
+        return res.status(200).json(user);
     } catch (error) {
         console.log(error);
         return res.status(500).json({

@@ -22,12 +22,8 @@ export const create = async (req, res) => {
             weight,
             needs
         });
-        const product = (await newProduct.save()).toObject();
+        const product = await newProduct.save();
         setMaxValues({price, weight, height});
-
-        product.id = product._id;
-        delete product._id;
-        delete product.__v;
 
         return res.status(200).json(product);
     } catch (error) {
@@ -44,13 +40,7 @@ export const getAll = async (req, res) => {
             });
         }
         
-        const products = await Product.find().lean();
-
-        products.forEach(product => {
-            product.id = product._id;
-            delete product._id;
-            delete product.__v;
-        });
+        const products = await Product.find();
         
         return res.status(200).json(products);
     } catch (error) {
