@@ -19,7 +19,7 @@ const tokenValidation = (req, res, next) => {
         }
 
         const token = auth.split(' ')[1];
-    
+        
         jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
             if (err) {
                 return res.status(401).json({
