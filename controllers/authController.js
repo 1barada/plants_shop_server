@@ -12,13 +12,6 @@ const generateAccessToken = ({_id, role}) => {
 
 export const login = async (req, res) => {
     try {
-        const validationErrors = validationResultHandler(req);
-        if (validationErrors.length !== 0) {
-            return res.status(400).json({
-                errors: validationErrors
-            });
-        }
-
         const {username, password} = req.body;
         
         const user = await User.findOne({name: username});
@@ -70,13 +63,6 @@ export const login = async (req, res) => {
 
 export const register = async (req, res) => {
     try {
-        const validationErrors = validationResultHandler(req);
-        if (validationErrors.length !== 0) {
-            return res.status(400).json({
-                errors: validationErrors
-            });
-        }
-
         const {username, password} = req.body;
 
         const passwordHash = bcrypt.hashSync(password, 8);

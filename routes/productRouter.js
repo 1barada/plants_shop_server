@@ -5,6 +5,7 @@ import roles from "../config/roles.js";
 import { createProductValidation } from "../validations/createProductValidation.js";
 import tokenValidation from "../validations/tokenValidation.js"
 import { uploadAvatarMiddleware } from '../middleware/multerMiddleware.js';
+import validationResultHandler from "../utils/validationResultHandler.js";
 
 const router = new Router();
 
@@ -13,6 +14,7 @@ router.post(
     tokenValidation,
     roleMiddleware([roles.admin]),
     createProductValidation, 
+    validationResultHandler,
     create
 );
 

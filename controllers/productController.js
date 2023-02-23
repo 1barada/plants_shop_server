@@ -1,17 +1,10 @@
 import Product from '../models/Product.js';
 import handleServerErrors from '../utils/handleServerErrors.js';
-import validationResultHandler from '../utils/validationResultHandler.js';
 import { getMaxValues, setMaxValues } from '../config/maxProductValues.js';
+import clientError from '../models/clientError.js';
 
 export const create = async (req, res) => {
     try {
-        const validationErrors = validationResultHandler(req);
-        if (validationErrors.length !== 0) {
-            return res.status(400).json({
-                errors: validationErrors
-            });
-        }
-
         const {title, description, price, imgUrl, height, weight, needs} = req.body;
         const newProduct = new Product({
             title,
@@ -33,16 +26,37 @@ export const create = async (req, res) => {
 
 export const getAll = async (req, res) => {
     try {
-        const validationErrors = validationResultHandler(req);
-        if (validationErrors.length !== 0) {
+        const page = parseInt(req.query.page);
+        if (!page) {
             return res.status(400).json({
-                errors: validationErrors
+                errors: [
+                    new clientError(
+                        400,
+                        'page must be a number',
+                        'no page argument or page is not a number',
+                        '',
+                        req.originalUrl
+                    )
+                ]
             });
         }
-        
-        const products = await Product.find();
-        
-        return res.status(200).json(products);
+
+        Product.paginate(page, (error, response) => {
+            if (error) {
+                return res.status(400).json({
+                    errors: [
+                        new clientError(
+                            400,
+                            error,
+                            '',
+                            '',
+                            req.originalUrl
+                        )
+                    ]
+                });
+            }
+            return res.status(200).json(response);
+        });
     } catch (error) {
         return handleServerErrors(error, req, res);
     }

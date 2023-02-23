@@ -1,7 +1,7 @@
 import clientError from "../models/clientError.js";
 import { validationResult } from 'express-validator';
 
-const validationResultHandler = (req) => {
+export default function(req, res, next) {
     const validationErrors = validationResult(req).errors;
     const clientErrors = validationErrors.map(error => {
         return new clientError(
@@ -13,7 +13,11 @@ const validationResultHandler = (req) => {
         );
     });
 
-    return clientErrors;
+    if (clientErrors.length !== 0) {
+        return res.status(400).json({
+            errors: clientErrors
+        });
+    }
+    
+    next();
 }
-
-export default validationResultHandler;

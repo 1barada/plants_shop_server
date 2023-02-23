@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import conditions from "../config/conditions.js";
+import pageLimit from '../config/pageLimit.js';
 
 const productSchema = new Schema({
     title: {
@@ -70,10 +71,36 @@ const productSchema = new Schema({
             delete ret.createdAt;
             delete ret.updatedAt;
         }
+    },
+    toObject: {
+        transform: function(doc, ret) {
+            ret.id = ret._id;
+            delete ret._id;
+            delete ret.__v;
+            delete ret.createdAt;
+            delete ret.updatedAt;
+        }
     }
 });
 
-productSchema.index({name: 'text', 'title': 'text'});
+productSchema.statics.paginate = async (page, callback) => {
+    if (page < 1) {
+        return callback('no such page');
+    }
+    let result = {
+        items: [],
+        totalPages: 0
+    };
+    let skip = pageLimit * (page - 1);
+
+    result.totalPages = Math.ceil((await Product.count({})) / pageLimit);
+    if (page > result.totalPages) {
+        return callback('no such page');
+    }
+    result.items = await Product.find().skip(skip).limit(pageLimit);
+
+    return callback(null, result);
+};
 
 const Product = model('Product', productSchema);
 
