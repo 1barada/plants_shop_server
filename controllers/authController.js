@@ -43,6 +43,7 @@ export const login = async (req, res) => {
             });
         }
         user._doc.token = generateAccessToken(user);
+        delete user._doc.purchases;
 
         return res.status(200).json(user);
     } catch (error) {
