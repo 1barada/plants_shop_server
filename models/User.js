@@ -1,6 +1,8 @@
-import { Schema, model, isValidObjectId } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import roles from '../config/roles.js';
 import Product from '../models/Product.js';
+import clientError from './clientError.js';
+import truncateToTwoDecimals from '../utils/truncateToTwoDecimal.js';
 
 const UserSchema = new Schema({
     name: {
@@ -48,60 +50,48 @@ const UserSchema = new Schema({
 });
 
 UserSchema.methods.addPurchases = async function(purchases, callback) {
-    const purchasesIds = [];
+    let totalCost = 0;
+    const toIncrement = [];
+    const toPush = [];
     for (let i = 0; i < purchases.length; i++) {
-        if (isValidObjectId(purchases[i].id)) {
-            purchasesIds.push(purchases[i].id);
+        const product = await Product.findById(purchases[i].id);
+        totalCost = truncateToTwoDecimals((purchases[i].quantity * product._doc.price) + totalCost);
+
+        const index = this.purchases.map(userPurchases => userPurchases.id.toString()).indexOf(purchases[i].id);
+        if (index === -1) {
+            toPush.push({
+                id: purchases[i].id,
+                quantity: purchases[i].quantity
+            });
         } else {
-            return callback(`product: ${purchases[i].id}, not exist`, this);
-        }
-    }
-
-    const products = await Product.find({_id: {$in: purchasesIds}});
-    if (purchases.length !== products.length) {
-        for (let i = 0; i < purchases.length; i++) {
-            let has = false;
-            for(let j = 0; j < products.length; j++) {
-                if (purchases[i].id === products[j]._id.toString()) {
-                    has = true;
-                }
-            }
-            if (!has) {
-                return callback(`product: ${purchases[i].id}, not exist`, this);
-            }
-        };
-    }
-
-    for (let j = 0; j < products.length; j++) {
-        let quantity;
-        for (let i = 0; i < purchases.length; i++) {
-            if (purchases[i].id === products[j]._id.toString()) {
-                quantity = purchases[i].quantity;
-                break;
-            }
-        }
-
-        let posInList = -1;
-        for (let i = 0; i < this.purchases.length; i++) {
-            if (this.purchases[i].id.toString() === products[j]._id.toString()) {
-                posInList = i;
-                break;
-            }
-        }
-
-        if (posInList > -1) {
-            this.purchases[posInList].quantity += parseInt(quantity);
-        } else {
-            this.purchases.push({
-                id: products[j]._id,
-                quantity: quantity
+            toIncrement.push({
+                index,
+                quantity: purchases[i].quantity
             });
         }
+    }
 
-    };
+    if (this.balance < totalCost) {
+        return callback(new clientError(
+            400,
+            'not enough money',
+            'user balance less than purchase cost',
+            '',
+            ''
+        ), null);
+    }
+
+    this.balance = truncateToTwoDecimals(this.balance - totalCost);
+    toIncrement.forEach(({index, quantity}) => {
+        this.purchases[index].quantity += parseInt(quantity);
+    });
+    toPush.forEach(push => {
+        this.purchases.push(push);
+    });
+    console.log(this.balance, totalCost, this.purchases)
 
     await this.save();
-    return callback(null, this);
+    return callback(null, this);;
 }
 
 const User = model('User', UserSchema);

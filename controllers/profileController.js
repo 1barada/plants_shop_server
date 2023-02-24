@@ -29,18 +29,13 @@ export const addPurchases = async (req, res) => {
         const user = await User.findOne({_id});
         user.addPurchases(purchases, (err, docs) => {
             if (err) {
-                return res.status(404).json({
+                err.instance = req.originalUrl;
+                return res.status(err.status).json({
                     errors: [
-                        new clientError(
-                            404,
-                            err,
-                            '',
-                            '',
-                            req.originalUrl
-                        )
+                        err
                     ]
-                }); 
-            }
+                });
+            } 
 
             return res.status(200).json(
                 docs

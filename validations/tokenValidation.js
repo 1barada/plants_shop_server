@@ -1,5 +1,6 @@
 import clientError from "../models/clientError.js";
 import jwt from "jsonwebtoken";
+import handleServerErrors from "../utils/handleServerErrors.js";
 
 const tokenValidation = (req, res, next) => {
     try {
@@ -39,18 +40,7 @@ const tokenValidation = (req, res, next) => {
             next();
         });
     } catch(error) {
-        console.log(error);
-        return res.status(500).json({
-            errors: [
-                new clientError(
-                    500,
-                    'Server error',
-                    '',
-                    '',
-                    req.originalUrl
-                )
-            ]
-        });
+        return handleServerErrors(error, req, res);
     }
 };
 
