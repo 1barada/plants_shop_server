@@ -32,7 +32,7 @@ export const getAll = async (req, res) => {
                 errors: [
                     new clientError(
                         400,
-                        'page must be a number',
+                        'no scuh page',
                         'no page argument or page is not a number',
                         '',
                         req.originalUrl
@@ -41,21 +41,16 @@ export const getAll = async (req, res) => {
             });
         }
 
-        Product.paginate(page, (error, response) => {
-            if (error) {
+        Product.paginate(page, (err, docs) => {
+            if (err) {
+                err.instance = req.originalUrl;
                 return res.status(400).json({
                     errors: [
-                        new clientError(
-                            400,
-                            error,
-                            '',
-                            '',
-                            req.originalUrl
-                        )
+                        err
                     ]
                 });
             }
-            return res.status(200).json(response);
+            return res.status(200).json(docs);
         });
     } catch (error) {
         return handleServerErrors(error, req, res);
@@ -64,13 +59,13 @@ export const getAll = async (req, res) => {
 
 export const search = async (req, res) => {
     try {
-        const {title, minPrice, maxPrice, minWeight, maxWeight, minHeight, maxHeight} = req.query;
+        const {title, minPrice, maxPrice, minWeight, maxWeight, minHeight, maxHeight, page} = req.query;
 
         let candidats = [];
         const maxValues = getMaxValues();
         if (title) {
-            candidats = await Product.find({title: {$regex: title, $options: 'i'}}).lean();
-            candidats = candidats.filter(({price, weight, height}) => 
+            candidats = await Product.find({title: {$regex: title, $options: 'i'}});
+            candidats = candidats._doc.filter(({price, weight, height}) => 
                 (price >= (minPrice || 0)) && (price <= (maxPrice || maxValues.maxPrice)) &&
                 (weight >= (minWeight || 0)) && (weight <= (maxWeight || maxValues.maxWeight)) && 
                 (height >= (minHeight || 0)) && (height <= (maxHeight || maxValues.maxHeight))
@@ -80,16 +75,27 @@ export const search = async (req, res) => {
                 price: {$gte: minPrice || 0, $lte: maxPrice || maxValues.maxPrice},
                 weight: {$gte: minWeight || 0, $lte: maxWeight || maxValues.maxWeight},
                 height: {$gte: minHeight || 0, $lte: maxHeight || maxValues.maxHeight}
-            }).lean();
+            });
         }
+        
+        Product.paginateConcrete(candidats, page, (err, docs) => {
+            if (err) {
+                err.instance = req.originalUrl;
+                return res.status(err.status).json({
+                    errors: [
+                        err
+                    ]
+                });
+            }
 
-        candidats.forEach(product => {
-            product.id = product._id;
-            delete product._id;
-            delete product.__v;
+            docs.items.forEach(product => {
+                product.id = product._id;
+                delete product._id;
+                delete product.__v;
+            });
+
+            return res.status(200).json(docs);
         });
-
-        return res.status(200).json(candidats);
     } catch (error) {
         return handleServerErrors(error, req, res);
     }

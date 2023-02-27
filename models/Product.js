@@ -1,6 +1,7 @@
 import { Schema, model } from "mongoose";
 import conditions from "../config/conditions.js";
 import pageLimit from '../config/pageLimit.js';
+import clientError from "./clientError.js";
 
 const productSchema = new Schema({
     title: {
@@ -84,20 +85,56 @@ const productSchema = new Schema({
 });
 
 productSchema.statics.paginate = async (page, callback) => {
-    if (page < 1) {
-        return callback('no such page');
+    if (!page || page < 1) {
+        page = 1;
     }
     let result = {
         items: [],
-        totalPages: 0
+        totalPages: 0,
+        page
     };
     let skip = pageLimit * (page - 1);
 
     result.totalPages = Math.ceil((await Product.count({})) / pageLimit);
     if (page > result.totalPages) {
-        return callback('no such page');
+        return callback(new clientError(
+            400,
+            'no such page',
+            '',
+            '',
+            ''
+        ));
     }
     result.items = await Product.find().skip(skip).limit(pageLimit);
+
+    return callback(null, result);
+};
+
+productSchema.statics.paginateConcrete = async (products, page, callback) => {
+    if (!page || page < 1) {
+        page = 1;
+    }
+    let result = {
+        items: [],
+        totalPages: 0,
+        page
+    };
+    let skip = pageLimit * (page - 1);
+
+    result.totalPages = Math.ceil(products.length / pageLimit);
+    if (page > result.totalPages) {
+        return callback(new clientError(
+            400,
+            'no such page',
+            '',
+            '',
+            ''
+        ));
+    }
+    for (let i = 0; i < pageLimit; i++) {
+        if (products[i + skip])
+            result.items.push(products[i + skip]);
+    }
 
     return callback(null, result);
 };
