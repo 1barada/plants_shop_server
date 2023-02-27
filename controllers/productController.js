@@ -27,19 +27,6 @@ export const create = async (req, res) => {
 export const getAll = async (req, res) => {
     try {
         const page = parseInt(req.query.page);
-        if (!page) {
-            return res.status(400).json({
-                errors: [
-                    new clientError(
-                        400,
-                        'no scuh page',
-                        'no page argument or page is not a number',
-                        '',
-                        req.originalUrl
-                    )
-                ]
-            });
-        }
 
         Product.paginate(page, (err, docs) => {
             if (err) {
@@ -57,9 +44,12 @@ export const getAll = async (req, res) => {
     }
 };
 
-export const search = async (req, res) => {
+export const search = async (req, res, next) => {
     try {
         const {title, minPrice, maxPrice, minWeight, maxWeight, minHeight, maxHeight, page} = req.query;
+        if (!title && !minPrice && !maxPrice && !minHeight && !maxHeight && !minWeight && !maxWeight) {
+            return next();
+        }
 
         let candidats = [];
         const maxValues = getMaxValues();

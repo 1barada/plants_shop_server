@@ -20,12 +20,8 @@ router.post(
 
 router.get(
     '/',
+    search,
     getAll
-);
-
-router.get(
-    '/search',
-    search
 );
 
 router.post(
