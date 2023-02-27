@@ -55,7 +55,7 @@ export const search = async (req, res, next) => {
         const maxValues = getMaxValues();
         if (title) {
             candidats = await Product.find({title: {$regex: title, $options: 'i'}});
-            candidats = candidats._doc.filter(({price, weight, height}) => 
+            candidats = candidats.filter(({price, weight, height}) => 
                 (price >= (minPrice || 0)) && (price <= (maxPrice || maxValues.maxPrice)) &&
                 (weight >= (minWeight || 0)) && (weight <= (maxWeight || maxValues.maxWeight)) && 
                 (height >= (minHeight || 0)) && (height <= (maxHeight || maxValues.maxHeight))
