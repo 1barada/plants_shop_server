@@ -50,7 +50,7 @@ export const search = async (req, res, next) => {
         if (!title && !minPrice && !maxPrice && !minHeight && !maxHeight && !minWeight && !maxWeight) {
             return next();
         }
-
+        
         let candidats = [];
         const maxValues = getMaxValues();
         if (title) {

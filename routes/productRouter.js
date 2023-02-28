@@ -6,6 +6,7 @@ import { createProductValidation } from "../validations/createProductValidation.
 import tokenValidation from "../validations/tokenValidation.js"
 import { uploadAvatarMiddleware } from '../middleware/multerMiddleware.js';
 import validationResultHandler from "../utils/validationResultHandler.js";
+import searchValidation from "../validations/searchValidation.js";
 
 const router = new Router();
 
@@ -20,6 +21,7 @@ router.post(
 
 router.get(
     '/',
+    searchValidation,
     search,
     getAll
 );

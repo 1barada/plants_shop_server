@@ -122,6 +122,10 @@ productSchema.statics.paginateConcrete = async (products, page, callback) => {
     let skip = pageLimit * (page - 1);
 
     result.totalPages = Math.ceil(products.length / pageLimit);
+    if (result.totalPages === 0) {
+        return callback(null, result)
+    }
+
     if (page > result.totalPages) {
         return callback(new clientError(
             400,
@@ -131,6 +135,7 @@ productSchema.statics.paginateConcrete = async (products, page, callback) => {
             ''
         ));
     }
+
     for (let i = 0; i < pageLimit; i++) {
         if (products[i + skip])
             result.items.push(products[i + skip]);
