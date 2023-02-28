@@ -1,21 +1,19 @@
 import handleServerErrors from "../utils/handleServerErrors.js";
 import User from '../models/User.js';
 import Product from '../models/Product.js';
-import clientError from '../models/clientError.js';
 
 export const getPurchases = async (req, res) => {
     try {
         const {_id} = req.user;
 
         const user = await User.findOne({_id});
-        const products = [];
+        const productsQuantities = [];
         for (let i = 0; i < user.purchases.length; i++) {
             const product = (await Product.findOne({_id: user.purchases[i].id})).toObject();
-            product.quantity = user.purchases[i].quantity;
-            products.push(product);
+            productsQuantities.push({product, quantity: user.purchases[i].quantity});
         };
         
-        return res.status(200).json(products);
+        return res.status(200).json(productsQuantities);
     } catch (error) {
         return handleServerErrors(error, req, res);
     }

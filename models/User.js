@@ -88,7 +88,6 @@ UserSchema.methods.addPurchases = async function(purchases, callback) {
     toPush.forEach(push => {
         this.purchases.push(push);
     });
-    console.log(this.balance, totalCost, this.purchases)
 
     await this.save();
     return callback(null, this);;

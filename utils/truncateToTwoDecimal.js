@@ -1,4 +1,4 @@
 export default function truncateToTwoDecimal(num) {
-    const result = (Math.floor(num * 100) / 100).toFixed(2);
+    const result = `${num}`.match(/^\d+[.]{0,1}\d{0,2}/);
     return parseFloat(result);
 }
