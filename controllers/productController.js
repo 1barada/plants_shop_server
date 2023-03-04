@@ -28,7 +28,7 @@ export const create = async (req, res) => {
 export const getAll = async (req, res) => {
     try {
         const page = parseInt(req.query.page);
-
+        
         Product.paginate(page, (err, docs) => {
             if (err) {
                 err.instance = req.originalUrl;
@@ -38,7 +38,7 @@ export const getAll = async (req, res) => {
                     ]
                 });
             }
-            return res.status(200).json(docs);
+            return res.status(200).json({...docs, maxValues: getMaxValues()});
         });
     } catch (error) {
         return handleServerErrors(error, req, res);
@@ -119,7 +119,7 @@ export const search = async (req, res, next) => {
                 delete product.__v;
             });
 
-            return res.status(200).json(docs);
+            return res.status(200).json({...docs, maxValues: getMaxValues()});
         });
     } catch (error) {
         return handleServerErrors(error, req, res);
