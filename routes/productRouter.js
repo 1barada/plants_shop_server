@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { create, getAll, sendImgUrl, search } from "../controllers/productController.js";
+import { create, getAll, sendImgUrl, search, getOne } from "../controllers/productController.js";
 import roleMiddleware from "../middleware/roleMiddleware.js";
 import roles from "../config/roles.js";
 import { createProductValidation } from "../validations/createProductValidation.js";
@@ -17,6 +17,11 @@ router.post(
     createProductValidation, 
     validationResultHandler,
     create
+);
+
+router.get(
+    '/:id',
+    getOne
 );
 
 router.get(

@@ -2,6 +2,7 @@ import Product from '../models/Product.js';
 import handleServerErrors from '../utils/handleServerErrors.js';
 import { getMaxValues, setMaxValues } from '../config/maxProductValues.js';
 import clientError from '../models/clientError.js';
+import { isObjectIdOrHexString } from 'mongoose';
 
 export const create = async (req, res) => {
     try {
@@ -37,6 +38,40 @@ export const getAll = async (req, res) => {
                     ]
                 });
             }
+            return res.status(200).json(docs);
+        });
+    } catch (error) {
+        return handleServerErrors(error, req, res);
+    }
+};
+
+export const getOne = async (req, res) => {
+    try {
+        const {id} = req.params;
+        if (!isObjectIdOrHexString(id)) {
+            return res.status(400).json({
+                errors: new clientError(
+                    400,
+                    'no such product',
+                    'invalid parameter id',
+                    '',
+                    req.originalUrl
+                )
+            });
+        }
+        Product.findById(id, (err, docs) => {
+            if (err || !docs) {
+                return res.status(400).json({
+                    errors: new clientError(
+                        400,
+                        'no such product',
+                        'cannot get product. check if your id parameter is valid',
+                        '',
+                        req.originalUrl
+                    )
+                });
+            }
+
             return res.status(200).json(docs);
         });
     } catch (error) {
