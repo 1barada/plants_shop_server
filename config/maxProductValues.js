@@ -68,7 +68,13 @@ export function setMaxValues({price, weight, height}) {
 export const getMaxProductPrice = () => values.maxPrice;
 export const getMaxProductWeight = () => values.maxWeight;
 export const getMaxProductHeight = () => values.maxHeight;
-export const getMaxValues = () => values;
+export const getMaxValues = () => {
+    return {
+        maxPrice: Math.ceil(values.maxPrice),
+        maxWeight: Math.ceil(values.maxWeight),
+        maxHeight: Math.ceil(values.maxHeight),
+    };
+};
 
 
 export default {
