@@ -2,6 +2,20 @@ import handleServerErrors from "../utils/handleServerErrors.js";
 import User from '../models/User.js';
 import Product from '../models/Product.js';
 
+export const profileInfo = async (req, res) => {
+    try {
+        const {_id} = req.user;
+
+        const user = (await User.findById(_id)).toObject();
+        delete user.purchases;
+        
+        return res.status(200).json(user);
+    } catch (error) {
+        return handleServerErrors(error, req, res);
+    }
+};
+
+
 export const getPurchases = async (req, res) => {
     try {
         const {_id} = req.user;
@@ -24,7 +38,7 @@ export const addPurchases = async (req, res) => {
         const {_id} = req.user;
         const {purchases} = req.body;
 
-        const user = await User.findOne({_id});
+        let user = await User.findOne({_id});
         user.addPurchases(purchases, (err, docs) => {
             if (err) {
                 err.instance = req.originalUrl;
@@ -34,9 +48,10 @@ export const addPurchases = async (req, res) => {
                     ]
                 });
             } 
-
+            user = user.toObject();
+            delete user.purchases;
             return res.status(200).json(
-                docs
+                user
             );
         });        
     } catch (error) {
