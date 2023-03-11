@@ -6,7 +6,7 @@ const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const url = req.originalUrl;
         switch (url) {
-            case '/product/upload':
+            case '/product':
                 cb(null, 'media/images/products');
                 break;
             default:
@@ -30,8 +30,8 @@ const fileFilter = (req, file, cb) => {
 
 const multerMiddleware = multer({storage, fileFilter, });
 
-const uploadAvatarMiddleware = (req, res, next) => {
-    multerMiddleware.single('avatar')(req, res, (err) => {
+export const uploadImageMiddleware = (req, res, next) => {
+    multerMiddleware.single('img')(req, res, (err) => {
         if (err) {
             return res.status(400).json({
                 errors: [
@@ -49,5 +49,3 @@ const uploadAvatarMiddleware = (req, res, next) => {
         next();
     });
 };
-
-export {uploadAvatarMiddleware};

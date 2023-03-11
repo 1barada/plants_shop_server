@@ -6,12 +6,15 @@ import { isObjectIdOrHexString } from 'mongoose';
 
 export const create = async (req, res) => {
     try {
-        const {title, description, price, imgUrl, height, weight, needs} = req.body;
+        let imagePath;
+        console.log(req.file)
+        if (req.file) imagePath = '/' + req.file.path.replaceAll('\\', '/');
+        const {title, description, price, height, weight, needs} = req.body;
         const newProduct = new Product({
             title,
             description,
             price,
-            imgUrl,
+            imgUrl: imagePath,
             height,
             weight,
             needs
@@ -121,15 +124,6 @@ export const search = async (req, res, next) => {
 
             return res.status(200).json({...docs, maxValues: getMaxValues()});
         });
-    } catch (error) {
-        return handleServerErrors(error, req, res);
-    }
-};
-
-export const sendImgUrl = (req, res) => {
-    try {
-        const imagePath = req.file.path.replaceAll('\\', '/');
-        return res.json({path: imagePath});
     } catch (error) {
         return handleServerErrors(error, req, res);
     }

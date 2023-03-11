@@ -16,10 +16,6 @@ export const createProductValidation = [
     body('price')
         .isFloat({min: 0.0})
         .withMessage('price must be bigger than 0'),
-    body('imgUrl')
-        .optional()
-        .isURL()
-        .withMessage('{value} is not url'),
     body('height')
         .optional()
         .isFloat({min: 0.0})
@@ -29,15 +25,12 @@ export const createProductValidation = [
         .isFloat({min: 0.0})
         .withMessage('weight must be bigger than 0'),
     body('needs.water')
-        .optional()
         .isIn(conditions)
         .withMessage(`needs.water can only be: ${Object.values(conditions).join(', ')}`),
     body('needs.soil')
-        .optional()
         .isIn(conditions)
         .withMessage(`needs.soil can only be: ${Object.values(conditions).join(', ')}`),
     body('needs.sun')
-        .optional()
         .isIn(conditions)
         .withMessage(`needs.sun can only be: ${Object.values(conditions).join(', ')}`),
 ];
