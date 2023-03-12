@@ -21,13 +21,22 @@ export const getPurchases = async (req, res) => {
         const {_id} = req.user;
 
         const user = await User.findOne({_id});
-        const productsQuantities = [];
-        for (let i = 0; i < user.purchases.length; i++) {
-            const product = (await Product.findOne({_id: user.purchases[i].id})).toObject();
-            productsQuantities.push({product, quantity: user.purchases[i].quantity});
-        };
+        const productsQuantities = new Map();
+        const products = await Product.find({_id: {$in: user.purchases.map(product => product.id)}});  
+        products.forEach((product) => {
+            product = product.toObject();
+            const id = product.id.toString()
+            productsQuantities.set(id, {product: product, quantity: 0});
+        });
         
-        return res.status(200).json(productsQuantities);
+        user.purchases.forEach(purchase => {
+            const productQuantity = productsQuantities.get(purchase.id.toString());
+            if (productQuantity) {
+                productsQuantities.set(purchase.id.toString(), {product: productQuantity.product, quantity: purchase.quantity});
+            }
+        });
+        
+        return res.status(200).json(Array.from(productsQuantities, ([name, value]) => value));
     } catch (error) {
         return handleServerErrors(error, req, res);
     }

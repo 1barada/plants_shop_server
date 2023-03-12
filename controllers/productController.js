@@ -3,8 +3,12 @@ import handleServerErrors from '../utils/handleServerErrors.js';
 import { getMaxValues, setMaxValues } from '../config/maxProductValues.js';
 import clientError from '../models/clientError.js';
 import { isObjectIdOrHexString } from 'mongoose';
+import fs from 'fs';
+import { promisify } from 'util';
 
-export const create = async (req, res) => {
+const unlinkAsync = promisify(fs.unlink)
+
+export const createProduct = async (req, res) => {
     try {
         let imagePath;
         console.log(req.file)
@@ -23,6 +27,85 @@ export const create = async (req, res) => {
         setMaxValues({price, weight, height});
 
         return res.status(200).json(product);
+    } catch (error) {
+        return handleServerErrors(error, req, res);
+    }
+};
+
+export const deleteProduct = async (req, res) => {
+    try {
+        const id = req.params.id;
+        if (!id) {
+            return res.status(400).json({
+                errors: new clientError(
+                    400,
+                    'no such product',
+                    'invalid parameter id or product with such id not exist',
+                    '',
+                    req.originalUrl
+                )
+            });
+        }
+
+        Product.deleteOne({_id: id}, async (err, docs) => {
+            if (err || docs.deletedCount === 0) {
+                return res.status(400).json({
+                    errors: new clientError(
+                        400,
+                        'no such product',
+                        'invalid parameter id or product with such id not exist',
+                        '',
+                        req.originalUrl
+                    )
+                });
+            }
+            await unlinkAsync(req.file.path);
+
+            return res.status(200).send();
+        });
+    } catch (error) {
+        return handleServerErrors(error, req, res);
+    }
+};
+
+export const updateProduct = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const body = req.body;
+        if (!id) {
+            return res.status(400).json({
+                errors: new clientError(
+                    400,
+                    'no such product',
+                    'invalid parameter id or product with such id not exist',
+                    '',
+                    req.originalUrl
+                )
+            });
+        }
+
+        const update = {
+            title: body.title,
+            description: body.description,
+            price: body.price,
+            weight: body.weight,
+            height: body.height,
+        }
+
+        Product.findOneAndUpdate({_id: id}, (err, docs) => {
+            if (err || docs.deletedCount === 0) {
+                return res.status(400).json({
+                    errors: new clientError(
+                        400,
+                        'no such product',
+                        'invalid parameter id or product with such id not exist',
+                        '',
+                        req.originalUrl
+                    )
+                });
+            }
+            return res.status(200).send();
+        });
     } catch (error) {
         return handleServerErrors(error, req, res);
     }

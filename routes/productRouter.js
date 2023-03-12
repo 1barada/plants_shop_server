@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { create, getAll, search, getOne } from "../controllers/productController.js";
+import { createProduct, deleteProduct, updateProduct, getAll, search, getOne } from "../controllers/productController.js";
 import roleMiddleware from "../middleware/roleMiddleware.js";
 import roles from "../config/roles.js";
 import { createProductValidation } from "../validations/createProductValidation.js";
@@ -17,7 +17,22 @@ router.post(
     uploadImageMiddleware,
     createProductValidation, 
     validationResultHandler,
-    create
+    createProduct
+);
+
+router.delete(
+    '/:id',
+    tokenValidation,
+    roleMiddleware([roles.admin]),
+    uploadImageMiddleware,
+    deleteProduct
+);
+
+router.patch(
+    '/:id',
+    tokenValidation,
+    roleMiddleware([roles.admin]),
+    updateProduct
 );
 
 router.get(
