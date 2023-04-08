@@ -28,16 +28,16 @@ const fileFilter = (req, file, cb) => {
     cb(null, true);
 };
 
-const multerMiddleware = multer({storage, fileFilter, });
+const multerMiddleware = multer({storage, fileFilter});
 
 export const uploadImageMiddleware = (req, res, next) => {
-    multerMiddleware.single('img')(req, res, (err) => {
+    multerMiddleware.single('img')(req, res, async (err) => {
         if (err) {
             return res.status(400).json({
                 errors: [
                     new clientError(
-                        400,
-                        'this format is not supported. Valid formats: ' + imageTypes.join(', '),
+                        500,
+                        'server error. cannot upload the image',
                         '',
                         '',
                         req.originalUrl

@@ -4,29 +4,50 @@ import { getMaxValues, setMaxValues } from '../config/maxProductValues.js';
 import clientError from '../models/clientError.js';
 import { isObjectIdOrHexString } from 'mongoose';
 import fs from 'fs';
+import imageKit from '../utils/imageKit.js';
 import { promisify } from 'util';
 
 const unlinkAsync = promisify(fs.unlink)
 
 export const createProduct = async (req, res) => {
     try {
-        let imagePath;
-        console.log(req.file)
-        if (req.file) imagePath = '/' + req.file.path.replaceAll('\\', '/');
         const {title, description, price, height, weight, needs} = req.body;
         const newProduct = new Product({
             title,
             description,
             price,
-            imgUrl: imagePath,
             height,
             weight,
             needs
         });
-        const product = await newProduct.save();
+
+        if (req.file) {
+            const image = await fs.promises.readFile(req.file.path);
+
+            const imageResponse = await imageKit.upload({
+                file: image,
+                fileName: newProduct._id.toString(),
+                isPrivateFile: false
+            });
+            
+            newProduct.imgUrl = imageKit.url({
+                path: imageResponse.filePath,
+                transformation: [{
+                    width: 400
+                }]
+            });
+
+            fs.unlink(req.file.path, (err) => {
+                if (err) {
+                    console.log(err)
+                };
+            });
+        }
+
+        await newProduct.save();
         setMaxValues({price, weight, height});
 
-        return res.status(200).json(product);
+        return res.status(200).json();
     } catch (error) {
         return handleServerErrors(error, req, res);
     }

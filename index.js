@@ -27,8 +27,6 @@ app.listen(port, async () => {
         });
 });
 
-app.use('/media/images/products', express.static(path.join(__dirname, 'media', 'images', 'products')));
-
 app.use('/auth', authRouter);
 app.use('/product', productRouter);
 app.use('/profile', profileRouter);
