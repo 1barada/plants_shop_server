@@ -20,11 +20,12 @@ const port = process.env.PORT ?? 3001;
 app.listen(port, async () => {
     console.log(`Server started on port: ${port}`)
 
-    await mongoose.connect(`mongodb+srv://${process.env.DB_LOGIN}:${process.env.DB_PASSWORD}@cluster0.mqr4fau.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`)
-        .then(() => console.log('DB connected'))
-        .catch(error => {
-            console.log(error);
-        });
+    try {
+        await mongoose.connect(`mongodb+srv://${process.env.DB_LOGIN}:${process.env.DB_PASSWORD}@cluster0.mqr4fau.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`);
+    } catch(error) {
+        console.error(error);
+    }
+    console.log('DB connected');
 });
 
 app.use('/auth', authRouter);
