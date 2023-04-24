@@ -7,16 +7,16 @@ const storage = multer.diskStorage({
         const url = req.originalUrl;
         switch (url) {
             case '/product':
-                cb(null, 'media/images/products');
+                cb(null, 'media');
                 break;
             default:
                 return cb(new Error('no path to save media. path: ' + url));
         }
-        cb(null, 'media/images/products')
+        cb(null, 'media')
     },
     filename: function (req, file, cb) {
         const fileExtension = file.mimetype.split('/')[1];
-        cb(null, file.fieldname + '-' + Date.now() + '.' + fileExtension)
+        cb(null, Date.now() + '.' + fileExtension)
     }
 });
 
@@ -41,7 +41,8 @@ export const uploadImageMiddleware = (req, res, next) => {
                         '',
                         '',
                         req.originalUrl
-                    )
+                    ),
+                    err
                 ]
             });
         }

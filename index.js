@@ -24,6 +24,7 @@ app.listen(port, async () => {
         await mongoose.connect(`mongodb+srv://${process.env.DB_LOGIN}:${process.env.DB_PASSWORD}@cluster0.mqr4fau.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`);
     } catch(error) {
         console.error(error);
+        return;
     }
     console.log('DB connected');
 });
