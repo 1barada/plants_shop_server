@@ -7,7 +7,7 @@ const storage = multer.diskStorage({
         const url = req.originalUrl;
         switch (url) {
             case '/product':
-                cb(null, 'tmp');
+                cb(null, '/tmp');
                 break;
             default:
                 return cb(new Error('no path to save media. path: ' + url));
