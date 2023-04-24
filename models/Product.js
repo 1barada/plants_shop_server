@@ -97,6 +97,7 @@ productSchema.statics.paginate = async (page, callback) => {
     let totalItems;
     try {
         totalItems = await Product.count({});
+        console.log(totalItems);
     } catch (error) {
         console.error(error);
         return (error);
