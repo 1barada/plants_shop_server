@@ -31,23 +31,27 @@ const fileFilter = (req, file, cb) => {
 const multerMiddleware = multer({storage, fileFilter});
 
 export const uploadImageMiddleware = (req, res, next) => {
-    multerMiddleware.single('img')(req, res, (err) => {
-        if (err) {
-            console.log(err, req.file.path)
-            return res.status(400).json({
-                errors: [
-                    new clientError(
-                        500,
-                        'server error. cannot upload the image',
-                        '',
-                        '',
-                        req.originalUrl
-                    ),
-                    err
-                ]
-            });
-        }
-
-        next();
-    });
+    try {
+        multerMiddleware.single('img')(req, res, (err) => {
+            if (err) {
+                console.log(err, req.file.path)
+                return res.status(400).json({
+                    errors: [
+                        new clientError(
+                            500,
+                            'server error. cannot upload the image',
+                            '',
+                            '',
+                            req.originalUrl
+                        ),
+                        err
+                    ]
+                });
+            }
+    
+            next();
+        });
+    } catch(error) {
+        console.log(error);
+    }
 };
