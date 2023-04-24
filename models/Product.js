@@ -93,16 +93,9 @@ productSchema.statics.paginate = async (page, callback) => {
         totalPages: 0,
         page
     };
-    const skip = pageLimit * (page - 1);
-    let totalItems;
-    try {
-        totalItems = await Product.count({});
-        console.log(totalItems);
-    } catch (error) {
-        console.error(error);
-        return (error);
-    }
-    result.totalPages = Math.ceil(totalItems / pageLimit);
+    let skip = pageLimit * (page - 1);
+
+    result.totalPages = Math.ceil((await Product.count({})) / pageLimit);
     if (page > result.totalPages) {
         return callback(new clientError(
             400,
