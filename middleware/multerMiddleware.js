@@ -12,12 +12,11 @@ const storage = multer.diskStorage({
             default:
                 return cb(new Error('no path to save media. path: ' + url));
         }
-        cb(null, 'tmp')
     },
     filename: function (req, file, cb) {
         console.log(file)
         const fileExtension = file.mimetype.split('/')[1];
-        cb(null, file.filename + '-' + Date.now() + '.' + fileExtension)
+        cb(null, file.originalname.split('.')[0] + '-' + Date.now() + '.' + fileExtension)
     }
 });
 
