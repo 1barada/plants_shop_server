@@ -32,8 +32,8 @@ const multerMiddleware = multer({storage, fileFilter});
 
 export const uploadImageMiddleware = (req, res, next) => {
     multerMiddleware.single('img')(req, res, (err) => {
-        console.log(err)
         if (err) {
+            console.log(err)
             return res.status(400).json({
                 errors: [
                     new clientError(
