@@ -34,7 +34,7 @@ export const uploadImageMiddleware = (req, res, next) => {
     try {
         multerMiddleware.single('img')(req, res, (err) => {
             if (err) {
-                console.log(err, req.file.path)
+                console.log(err);
                 return res.status(400).json({
                     errors: [
                         new clientError(
