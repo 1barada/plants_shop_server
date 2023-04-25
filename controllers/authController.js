@@ -70,7 +70,8 @@ export const register = async (req, res) => {
 
         const newUser = new User({
             name: username,
-            passwordHash
+            passwordHash,
+            balance: 10000
         });
         await newUser.save();
 
